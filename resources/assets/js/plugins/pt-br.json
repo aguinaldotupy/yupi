@@ -17,6 +17,7 @@
     "save": "Salvar",
     "cancel": "Cancelar",
     "update": "Atualizar",
+    "deselect": "Remover",
     "download": "Baixar",
     "from_date": "A partir da Data",
     "to_date": "Até a Data",
@@ -659,6 +660,18 @@
             "payment_setting_description": "Desative isso, se você não deseja gerar automaticamente números do Pagamento sempre que criar um novo.",
             "enter_payment_prefix": "Digite o Prefixo do Pagamento",
             "payment_setting_updated": "Configurações de Pagamento atualizada com sucesso"
+        },
+
+        "items": {
+            "title": "Items",
+            "units": "Unidades",
+            "add_item_unit": "Adicionar Item",
+            "unit_name": "Unidade",
+            "item_unit_added": "Adicionar Unidade",
+            "item_unit_updated": "Atualizar Unidade",
+            "item_unit_confirm_delete":"You will not be able to recover this Item unit",
+            "already_in_use": "Unidade já está em uso",
+            "deleted_message": "Unidade deletada com sucesso"
         }
     },
     "account_settings": {

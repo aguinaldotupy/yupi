@@ -8,14 +8,6 @@ COPY composer.* /app/
 # Copy database directory for autoloader optimization
 COPY database /app/database
 
-# Run composer to build dependencies in vendor folder
-RUN composer install --no-scripts --no-suggest --no-interaction --prefer-dist --optimize-autoloader 
-
-# Copy everything from project root into composer container's working dir
-COPY . /app
- 
-RUN composer dump-autoload --optimize --classmap-authoritative
-
 ##### STAGE 2 #####
 
 FROM php:7.3.12-fpm-alpine
@@ -30,9 +22,17 @@ ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
 
 # Set container's working dir
 WORKDIR /app
- 
+
 # Copy everything from project root into php container's working dir
 COPY . /app
+
+# Run composer to build dependencies in vendor folder
+RUN composer install --no-scripts --no-suggest --no-interaction --prefer-dist --optimize-autoloader
+
+# Copy everything from project root into composer container's working dir
+COPY . /app
+
+RUN composer dump-autoload --optimize --classmap-authoritative
 
 # Copy vendor folder from composer container into php container
 COPY --from=composer /app/vendor /app/vendor
@@ -46,7 +46,7 @@ RUN touch database/database.sqlite && \
     chmod -R 755 . && \
     chmod -R 775 storage/framework/ && \
     chmod -R 775 storage/logs/ && \
-    chmod -R 775 bootstrap/cache/  
+    chmod -R 775 bootstrap/cache/
 
 EXPOSE 9000
 

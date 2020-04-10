@@ -45,6 +45,7 @@ class EnvironmentController extends Controller
             Artisan::call('key:generate --force');
             Artisan::call('migrate --seed --force');
             Artisan::call('migrate', ['--path' => 'vendor/laravel/passport/database/migrations', '--force' => true]);
+            Artisan::call('passport:install --force');
 
             \Storage::disk('local')->put('database_created', 'database_created');
 
