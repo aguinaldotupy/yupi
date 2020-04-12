@@ -1,53 +1,51 @@
-##### STAGE 1 #####
+FROM php:7.2-fpm
 
-FROM composer as composer
+ENV APP_ROOT /var/www/crater
 
-# Copy composer files from project root into composer container's working dir
-COPY composer.* /app/
+# Copy composer.lock and composer.json
+COPY composer.lock composer.json ${APP_ROOT}/
 
-# Copy database directory for autoloader optimization
-COPY database /app/database
+# Set working directory
+WORKDIR ${APP_ROOT}
 
-##### STAGE 2 #####
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    locales \
+    zip \
+    jpegoptim optipng pngquant gifsicle \
+    vim \
+    unzip \
+    git \
+    curl
 
-FROM php:7.3.12-fpm-alpine
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Use the default production configuration
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+# Install extensions
+RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl
+RUN docker-php-ext-configure gd --with-gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/
+RUN docker-php-ext-install gd
 
-RUN apk add --no-cache libpng-dev libxml2-dev oniguruma-dev libzip-dev gnu-libiconv && \
-    docker-php-ext-install bcmath ctype json gd mbstring pdo pdo_mysql tokenizer xml zip
+# Install composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
+# Add user for laravel application
+RUN groupadd -g 1000 www
+RUN useradd -u 1000 -ms /bin/bash -g www www
 
-# Set container's working dir
-WORKDIR /app
+# Copy existing application directory contents
+COPY . ${APP_ROOT}
 
-# Copy everything from project root into php container's working dir
-COPY . /app
+# Copy existing application directory permissions
+COPY --chown=www:www . ${APP_ROOT}
 
-# Run composer to build dependencies in vendor folder
-RUN composer install --no-scripts --no-suggest --no-interaction --prefer-dist --optimize-autoloader
+# Change current user to www
+USER www
 
-# Copy everything from project root into composer container's working dir
-COPY . /app
-
-RUN composer dump-autoload --optimize --classmap-authoritative
-
-# Copy vendor folder from composer container into php container
-COPY --from=composer /app/vendor /app/vendor
-
-RUN touch database/database.sqlite && \
-    cp .env.example .env && \
-    php artisan config:cache && \
-    php artisan passport:keys && \
-    php artisan key:generate && \
-    chown -R www-data:www-data . && \
-    chmod -R 755 . && \
-    chmod -R 775 storage/framework/ && \
-    chmod -R 775 storage/logs/ && \
-    chmod -R 775 bootstrap/cache/
-
+# Expose port 9000 and start php-fpm server
 EXPOSE 9000
-
-CMD ["php-fpm", "--nodaemonize"]
+CMD ["php-fpm"]
