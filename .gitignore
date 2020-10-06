@@ -11,6 +11,7 @@ Homestead.yaml
 .rnd
 /.expo
 /.vscode
+/docker-compose/db/data/
 docker-compose.yml
 docker-compose.yaml
 .phpstorm.meta.php

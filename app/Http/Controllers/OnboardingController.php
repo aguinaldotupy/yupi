@@ -48,9 +48,11 @@ class OnboardingController extends Controller
             ["code"=>"en", "name" => "English"],
             ["code"=>"fr", "name" => "French"],
             ["code"=>"es", "name" => "Spanish"],
+            ["code"=>"sr_LA", "name" => "Srpski"],
             ["code"=>"ar", "name" => "العربية"],
             ["code"=>"de", "name" => "German"],
-            ["code"=>"pt-br", "name" => "Portuguese (Brazilian)"]
+            ["code"=>"pt-br", "name" => "Portuguese (Brazilian)"],
+            ["code"=>"it", "name" => "Italian"],
         ];
         $fiscal_years = [
             ['key' => 'january-december' , 'value' => '1-12'],
