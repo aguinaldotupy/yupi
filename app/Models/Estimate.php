@@ -2,44 +2,43 @@
 
 namespace Crater\Models;
 
-use Crater\Models\EstimateTemplate;
-use Crater\Models\Company;
-use Crater\Models\Tax;
-use Illuminate\Database\Eloquent\Model;
-use Crater\Models\CompanySetting;
+use App;
+use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
 use Crater\Mail\SendEstimateMail;
+use Crater\Traits\GeneratesPdfTrait;
 use Crater\Traits\HasCustomFieldsTrait;
-use Vinkla\Hashids\Facades\Hashids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Crater\Traits\GeneratesPdfTrait;
-use Barryvdh\DomPDF\Facade as PDF;
-use Illuminate\Support\Facades\Auth;
+use Vinkla\Hashids\Facades\Hashids;
 
 class Estimate extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, GeneratesPdfTrait;
+    use HasFactory;
+    use InteractsWithMedia;
+    use GeneratesPdfTrait;
     use HasCustomFieldsTrait;
 
-    const STATUS_DRAFT = 'DRAFT';
-    const STATUS_SENT = 'SENT';
-    const STATUS_VIEWED = 'VIEWED';
-    const STATUS_EXPIRED = 'EXPIRED';
-    const STATUS_ACCEPTED = 'ACCEPTED';
-    const STATUS_REJECTED = 'REJECTED';
+    public const STATUS_DRAFT = 'DRAFT';
+    public const STATUS_SENT = 'SENT';
+    public const STATUS_VIEWED = 'VIEWED';
+    public const STATUS_EXPIRED = 'EXPIRED';
+    public const STATUS_ACCEPTED = 'ACCEPTED';
+    public const STATUS_REJECTED = 'REJECTED';
 
     protected $dates = [
         'created_at',
         'updated_at',
-        'deleted_at'
+        'deleted_at',
     ];
 
     protected $appends = [
         'formattedExpiryDate',
         'formattedEstimateDate',
-        'estimatePdfUrl'
+        'estimatePdfUrl',
     ];
 
     protected $guarded = ['id'];
@@ -68,17 +67,21 @@ class Estimate extends Model implements HasMedia
 
     public function getEstimatePdfUrlAttribute()
     {
-        return url('/estimates/pdf/' . $this->unique_hash);
+        return url('/estimates/pdf/'.$this->unique_hash);
     }
 
     public static function getNextEstimateNumber($value)
     {
         // Get the last created order
-        $lastOrder = Estimate::where('estimate_number', 'LIKE', $value . '-%')
+        $lastOrder = Estimate::where('estimate_number', 'LIKE', $value.'-%')
             ->orderBy('estimate_number', 'desc')
             ->first();
 
-        if (!$lastOrder) {
+        // Get number length config
+        $numberLength = CompanySetting::getSetting('estimate_number_length', request()->header('company'));
+        $numberLengthText = "%0{$numberLength}d";
+
+        if (! $lastOrder) {
             // We get here if there is no order at all
             // If there is no number set it to 0, which will be 1 at the end.
             $number = 0;
@@ -94,7 +97,7 @@ class Estimate extends Model implements HasMedia
         // the %05d part makes sure that there are always 6 numbers in the string.
         // so it adds the missing zero's when needed.
 
-        return sprintf('%06d', intval($number) + 1);
+        return sprintf($numberLengthText, intval($number) + 1);
     }
 
     public function emailLogs()
@@ -127,20 +130,17 @@ class Estimate extends Model implements HasMedia
         return $this->hasMany(Tax::class);
     }
 
-    public function estimateTemplate()
-    {
-        return $this->belongsTo('Crater\Models\EstimateTemplate');
-    }
-
     public function getEstimateNumAttribute()
     {
         $position = $this->strposX($this->estimate_number, "-", 1) + 1;
+
         return substr($this->estimate_number, $position);
     }
 
     public function getEstimatePrefixAttribute()
     {
         $prefix = explode("-", $this->estimate_number)[0];
+
         return $prefix;
     }
 
@@ -162,12 +162,14 @@ class Estimate extends Model implements HasMedia
     public function getFormattedExpiryDateAttribute($value)
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
         return Carbon::parse($this->expiry_date)->format($dateFormat);
     }
 
     public function getFormattedEstimateDateAttribute($value)
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
         return Carbon::parse($this->estimate_date)->format($dateFormat);
     }
 
@@ -198,9 +200,9 @@ class Estimate extends Model implements HasMedia
     {
         foreach (explode(' ', $search) as $term) {
             $query->whereHas('user', function ($query) use ($term) {
-                $query->where('name', 'LIKE', '%' . $term . '%')
-                    ->orWhere('contact_name', 'LIKE', '%' . $term . '%')
-                    ->orWhere('company_name', 'LIKE', '%' . $term . '%');
+                $query->where('name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('contact_name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('company_name', 'LIKE', '%'.$term.'%');
             });
         }
     }
@@ -295,7 +297,7 @@ class Estimate extends Model implements HasMedia
 
         self::createItems($estimate, $request);
 
-        if ($request->has('taxes') && (!empty($request->taxes))) {
+        if ($request->has('taxes') && (! empty($request->taxes))) {
             self::createTaxes($estimate, $request);
         }
 
@@ -308,7 +310,6 @@ class Estimate extends Model implements HasMedia
         return Estimate::with([
             'items.taxes',
             'user',
-            'estimateTemplate',
             'taxes'
         ])
             ->find($estimate->id);
@@ -325,7 +326,7 @@ class Estimate extends Model implements HasMedia
 
         self::createItems($this, $request);
 
-        if ($request->has('taxes') && (!empty($request->taxes))) {
+        if ($request->has('taxes') && (! empty($request->taxes))) {
             self::createTaxes($this, $request);
         }
 
@@ -334,11 +335,10 @@ class Estimate extends Model implements HasMedia
         }
 
         return Estimate::with([
-            'items.taxes',
-            'user',
-            'estimateTemplate',
-            'taxes'
-        ])
+                'items.taxes',
+                'user',
+                'taxes'
+            ])
             ->find($this->id);
     }
 
@@ -379,6 +379,7 @@ class Estimate extends Model implements HasMedia
         $data['user'] = $this->user->toArray();
         $data['company'] = $this->company->toArray();
         $data['body'] = $this->getEmailBody($data['body']);
+        $data['attach']['data'] = ($this->getEmailAttachmentSetting()) ? $this->getPDFData() : null;
 
         \Mail::to($data['to'])->send(new SendEstimateMail($data));
 
@@ -388,7 +389,7 @@ class Estimate extends Model implements HasMedia
         }
 
         return [
-            'success' => true
+            'success' => true,
         ];
     }
 
@@ -401,9 +402,9 @@ class Estimate extends Model implements HasMedia
         if ($this->tax_per_item === 'YES') {
             foreach ($this->items as $item) {
                 foreach ($item->taxes as $tax) {
-                    if (!in_array($tax->name, $taxTypes)) {
+                    if (! in_array($tax->name, $taxTypes)) {
                         array_push($taxTypes, $tax->name);
-                        array_push($labels, $tax->name . ' (' . $tax->percent . '%)');
+                        array_push($labels, $tax->name.' ('.$tax->percent.'%)');
                     }
                 }
             }
@@ -423,9 +424,13 @@ class Estimate extends Model implements HasMedia
             }
         }
 
-        $estimateTemplate = EstimateTemplate::find($this->estimate_template_id);
+        $estimateTemplate = self::find($this->id)->template_name;
 
         $company = Company::find($this->company_id);
+        $locale = CompanySetting::getSetting('language', $company->id);
+
+        App::setLocale($locale);
+
         $logo = $company->logo_path;
 
         view()->share([
@@ -436,10 +441,10 @@ class Estimate extends Model implements HasMedia
             'billing_address' => $this->getCustomerBillingAddress(),
             'notes' => $this->getNotes(),
             'labels' => $labels,
-            'taxes' => $taxes
+            'taxes' => $taxes,
         ]);
 
-        return PDF::loadView('app.pdf.estimate.' . $estimateTemplate->view);
+        return PDF::loadView('app.pdf.estimate.'.$estimateTemplate);
     }
 
     public function getCompanyAddress()
@@ -468,6 +473,17 @@ class Estimate extends Model implements HasMedia
         return $this->getFormattedString($this->notes);
     }
 
+    public function getEmailAttachmentSetting()
+    {
+        $estimateAsAttachment = CompanySetting::getSetting('estimate_email_attachment', $this->company_id);
+
+        if ($estimateAsAttachment == 'NO') {
+            return false;
+        }
+
+        return true;
+    }
+
     public function getEmailBody($body)
     {
         $values = array_merge($this->getFieldsArray(), $this->getExtraFields());
@@ -484,7 +500,7 @@ class Estimate extends Model implements HasMedia
             '{ESTIMATE_EXPIRY_DATE}' => $this->formattedExpiryDate,
             '{ESTIMATE_NUMBER}' => $this->estimate_number,
             '{ESTIMATE_REF_NUMBER}' => $this->reference_number,
-            '{ESTIMATE_LINK}' => url('/customer/estimates/pdf/' . $this->unique_hash)
+            '{ESTIMATE_LINK}' => url('/customer/estimates/pdf/'.$this->unique_hash),
         ];
     }
 }

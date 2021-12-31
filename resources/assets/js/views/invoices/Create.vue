@@ -15,7 +15,7 @@
             to="/admin/invoices"
           />
           <sw-breadcrumb-item
-            v-if="$route.name === 'invoice.edit'"
+            v-if="$route.name === 'invoices.edit'"
             :title="$t('invoices.edit_invoice')"
             to="#"
             active
@@ -259,7 +259,7 @@
               @click="openTemplateModal"
             >
               <span class="flex text-black">
-                {{ $t('invoices.template') }} {{ getTemplateId }}
+                {{ getTemplateName }}
                 <pencil-icon class="h-5 ml-2 -mr-1" />
               </span>
             </sw-button>
@@ -460,7 +460,7 @@ export default {
       taxPerItem: null,
       discountPerItem: null,
       isLoadingInvoice: false,
-      isLoadingData: false,
+      isLoadingData: true,
       isLoading: false,
       maxDiscount: 0,
       invoicePrefix: null,
@@ -510,7 +510,7 @@ export default {
     ...mapGetters('notes', ['notes']),
 
     ...mapGetters('invoice', [
-      'getTemplateId',
+      'getTemplateName',
       'selectedCustomer',
       'selectedNote',
     ]),
@@ -710,6 +710,7 @@ export default {
       'selectCustomer',
       'updateInvoice',
       'resetSelectedNote',
+      'setTemplate',
     ]),
 
     ...mapActions('invoiceTemplate', ['fetchInvoiceTemplates']),
@@ -721,6 +722,8 @@ export default {
     ...mapActions('taxType', ['fetchTaxTypes']),
 
     ...mapActions('customFields', ['fetchCustomFields']),
+
+    ...mapActions('notification', ['showNotification']),
 
     selectFixed() {
       if (this.newInvoice.discount_type === 'fixed') {
@@ -782,6 +785,7 @@ export default {
               this.invoiceNumAttribute = res4.data.nextNumber
               this.invoicePrefix = res4.data.prefix
             }
+            this.setTemplate(this.getInvoiceTemplates[0].name)
           } else {
             this.invoicePrefix = res4.data.prefix
           }
@@ -832,10 +836,9 @@ export default {
 
               if (res2.data) {
                 let customFields = res2.data.customFields.data
-                this.setEditCustomFields(fields, customFields)
+                await this.setEditCustomFields(fields, customFields)
               }
             }
-
             this.isLoadingInvoice = false
           })
           .catch((error) => {
@@ -898,7 +901,7 @@ export default {
         total: this.total,
         tax: this.totalTax,
         user_id: null,
-        invoice_template_id: this.getTemplateId,
+        template_name: this.getTemplateName,
       }
 
       if (this.selectedCustomer != null) {
@@ -918,8 +921,10 @@ export default {
         .then((res) => {
           if (res.data) {
             this.$router.push(`/admin/invoices/${res.data.invoice.id}/view`)
-
-            window.toastr['success'](this.$t('invoices.created_message'))
+            this.showNotification({
+              type: 'success',
+              message: this.$t('invoices.created_message'),
+            })
           }
 
           this.isLoading = false
@@ -935,13 +940,17 @@ export default {
           this.isLoading = false
           if (res.data.success) {
             this.$router.push(`/admin/invoices/${res.data.invoice.id}/view`)
-            window.toastr['success'](this.$t('invoices.updated_message'))
+            this.showNotification({
+              type: 'success',
+              message: this.$t('invoices.updated_message'),
+            })
           }
 
           if (res.data.error === 'invalid_due_amount') {
-            window.toastr['error'](
-              this.$t('invoices.invalid_due_amount_message')
-            )
+            this.showNotification({
+              type: 'error',
+              message: this.$t('invoices.invalid_due_amount_message'),
+            })
           }
         })
         .catch((err) => {
