@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use Crater\Models\EstimateTemplate;
+use Illuminate\Database\Seeder;
 
 class EstimateTemplateSeeder extends Seeder
 {

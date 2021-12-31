@@ -1,7 +1,7 @@
 <?php
+
 namespace Crater\Models;
 
-use Crater\Models\Company;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

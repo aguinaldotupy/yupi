@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use Crater\Models\InvoiceTemplate;
+use Illuminate\Database\Seeder;
 
 class InvoiceTemplateSeeder extends Seeder
 {
