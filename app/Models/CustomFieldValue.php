@@ -2,13 +2,17 @@
 
 namespace Crater\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CustomFieldValue extends Model
 {
     use HasFactory;
+
+    protected $dates = [
+        'date_answer',
+        'date_time_answer'
+    ];
 
     protected $guarded = [
         'id',
@@ -18,28 +22,13 @@ class CustomFieldValue extends Model
         'defaultAnswer',
     ];
 
-    public function setDateAnswerAttribute($value)
-    {
-        if ($value && $value != null) {
-            $this->attributes['date_answer'] = Carbon::createFromFormat('Y-m-d', $value);
-        }
-        $this->attributes['date_answer'] = null;
-    }
-
     public function setTimeAnswerAttribute($value)
     {
         if ($value && $value != null) {
             $this->attributes['time_answer'] = date("H:i:s", strtotime($value));
+        } else {
+            $this->attributes['time_answer'] = null;
         }
-        $this->attributes['time_answer'] = null;
-    }
-
-    public function setDateTimeAnswerAttribute($value)
-    {
-        if ($value && $value != null) {
-            $this->attributes['date_time_answer'] = Carbon::createFromFormat('Y-m-d H:i', $value);
-        }
-        $this->attributes['time_answer'] = null;
     }
 
     public function getDefaultAnswerAttribute()

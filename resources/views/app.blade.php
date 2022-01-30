@@ -1,29 +1,50 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
+    <meta charset="utf-8">
     <title>Crater - Self Hosted Invoicing Platform</title>
-    <script src="/assets/js/pace/pace.js"></script>
-    <link href="{{mix("/assets/css/crater.css")}}" rel="stylesheet" type="text/css">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap" rel="stylesheet">
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicons/favicon-16x16.png">
-    <link rel="manifest" href="/assets/img/favicons/site.webmanifest">
-    <link rel="mask-icon" href="/assets/img/favicons/safari-pinned-tab.svg" color="#5851d8">
-    <link rel="shortcut icon" href="/assets/img/favicons/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
+    <link rel="manifest" href="/favicons/site.webmanifest">
+    <link rel="mask-icon" href="/favicons/safari-pinned-tab.svg" color="#5851d8">
+    <link rel="shortcut icon" href="/favicons/favicon.ico">
     <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-config" content="/assets/img/favicons/browserconfig.xml">
+    <meta name="msapplication-config" content="/favicons/browserconfig.xml">
     <meta name="theme-color" content="#ffffff">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Module Styles -->
+    @foreach(\Crater\Services\Module\ModuleFacade::allStyles() as $name => $path)
+        <link rel="stylesheet" href="/modules/styles/{{ $name }}">
+    @endforeach
+
+    @vite
 </head>
 
-<body class="h-full overflow-x-hidden bg-gray-100 layout-default skin-crater font-base">
-    <div id="app" class="h-full">
-        <router-view></router-view>
-    </div>
-    <script type="text/javascript" src="{{mix('/assets/js/app.js')}}"></script>
+<body
+    class="h-full overflow-hidden bg-gray-100 font-base
+    @if(isset($current_theme)) theme-{{ $current_theme }} @else theme-{{get_admin_portal_theme()}} @endif ">
+
+    <!-- Module Scripts -->
+    @foreach (\Crater\Services\Module\ModuleFacade::allScripts() as $name => $path)
+        @if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://']))
+            <script type="module" src="{!! $path !!}"></script>
+        @else
+            <script type="module" src="/modules/scripts/{{ $name }}"></script>
+        @endif
+    @endforeach
+
+    <script type="module">
+        @if(isset($customer_logo))
+
+        window.customer_logo = "/storage/{{$customer_logo}}"
+
+        @endif
+        window.Crater.start()
+    </script>
 </body>
 
 </html>

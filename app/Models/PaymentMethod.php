@@ -9,11 +9,31 @@ class PaymentMethod extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'company_id'];
+    protected $guarded = [
+        'id'
+    ];
+
+    public const TYPE_GENERAL = 'GENERAL';
+    public const TYPE_MODULE = 'MODULE';
+
+    protected $casts = [
+        'settings' => 'array',
+        'use_test_env' => 'boolean'
+    ];
+
+    public function setSettingsAttribute($value)
+    {
+        $this->attributes['settings'] = json_encode($value);
+    }
 
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
     }
 
     public function company()
@@ -21,9 +41,14 @@ class PaymentMethod extends Model
         return $this->belongsTo(Company::class);
     }
 
-    public function scopeWhereCompany($query, $company_id)
+    public function scopeWhereCompanyId($query, $id)
     {
-        $query->where('company_id', $company_id);
+        $query->where('company_id', $id);
+    }
+
+    public function scopeWhereCompany($query)
+    {
+        $query->where('company_id', request()->header('company'));
     }
 
     public function scopeWherePaymentMethod($query, $payment_id)
@@ -56,7 +81,7 @@ class PaymentMethod extends Model
     public function scopePaginateData($query, $limit)
     {
         if ($limit == 'all') {
-            return collect(['data' => $query->get()]);
+            return $query->get();
         }
 
         return $query->paginate($limit);
@@ -64,11 +89,18 @@ class PaymentMethod extends Model
 
     public static function createPaymentMethod($request)
     {
-        $data = $request->validated();
-        $data['company_id'] = $request->header('company');
+        $data = $request->getPaymentMethodPayload();
 
         $paymentMethod = self::create($data);
 
         return $paymentMethod;
+    }
+
+    public static function getSettings($id)
+    {
+        $settings = PaymentMethod::find($id)
+            ->settings;
+
+        return $settings;
     }
 }

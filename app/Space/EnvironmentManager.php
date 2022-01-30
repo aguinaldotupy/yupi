@@ -76,16 +76,16 @@ class EnvironmentManager
         }
 
         try {
-            $this->checkDatabaseConnection($request);
+            $conn = $this->checkDatabaseConnection($request);
 
-            $requirement = $this->checkVersionRequirements($request);
+            // $requirement = $this->checkVersionRequirements($request, $conn);
 
-            if ($requirement) {
-                return [
-                    'error' => 'minimum_version_requirement',
-                    'requirement' => $requirement,
-                ];
-            }
+            // if ($requirement) {
+            //     return [
+            //         'error' => 'minimum_version_requirement',
+            //         'requirement' => $requirement,
+            //     ];
+            // }
 
             if (\Schema::hasTable('users')) {
                 return [
@@ -176,7 +176,7 @@ class EnvironmentManager
      * @param DatabaseEnvironmentRequest $request
      * @return bool
      */
-    private function checkVersionRequirements(DatabaseEnvironmentRequest $request)
+    private function checkVersionRequirements(DatabaseEnvironmentRequest $request, $conn)
     {
         $connection = $request->database_connection;
 
@@ -194,9 +194,7 @@ class EnvironmentManager
 
         switch ($connection) {
             case 'mysql':
-                $dbSupportInfo = $checker->checkMysqlVersion(
-                    config('crater.min_mysql_version')
-                );
+                $dbSupportInfo = $checker->checkMysqlVersion($conn);
 
                 break;
 
