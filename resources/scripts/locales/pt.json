@@ -12,7 +12,7 @@
     "settings": "Configurações",
     "logout": "Encerrar sessão",
     "users": "Usuários",
-    "modules": "Modules"
+    "modules": "Navegação → módulos"
   },
   "general": {
     "add_company": "Adicionar Empresa",
@@ -29,7 +29,7 @@
     "to_date": "Até a Data",
     "from": "De",
     "to": "Para",
-    "ok": "Ok",
+    "ok": "Geral → Ok",
     "yes": "Sim",
     "no": "Não",
     "sort_by": "Ordenar por",
@@ -76,7 +76,7 @@
     "are_you_sure": "Tem certeza?",
     "list_is_empty": "Lista está vazia.",
     "no_tax_found": "Imposto não encontrado!",
-    "four_zero_four": "404",
+    "four_zero_four": "Geral → 404",
     "you_got_lost": "Ops! Se perdeu!",
     "go_home": "Ir para Home",
     "test_mail_conf": "Testar configuração de email",
@@ -93,13 +93,14 @@
     "no_note_found": "Nenhuma Nota Encontrada",
     "insert_note": "Inserir Nota",
     "copied_pdf_url_clipboard": "URL do PDF copiado para área de transferência!",
-    "copied_url_clipboard": "Copied url to clipboard!",
+    "copied_url_clipboard": "Geral → Copiado para área de transferência!",
     "docs": "Documentos",
     "do_you_wish_to_continue": "Você deseja continuar?",
     "note": "Observação",
-    "pay_invoice": "Pay Invoice",
-    "login_successfully": "Logged in successfully!",
-    "logged_out_successfully": "Logged out successfully"
+    "pay_invoice": "Geral → pagar cobrança",
+    "login_successfully": "Geral → logado com sucesso!",
+    "logged_out_successfully": "Geral → saiu com sucesso",
+    "mark_as_default": "Geral → Marcar como padrão"
   },
   "dashboard": {
     "select_year": "Selecione Ano",
@@ -108,7 +109,7 @@
       "customers": "Clientes",
       "invoices": "Faturas",
       "estimates": "Orçamentos",
-      "payments": "Payments"
+      "payments": "Dashboard → Cartões → Pagamentos"
     },
     "chart_info": {
       "total_sales": "Vendas",
@@ -180,7 +181,7 @@
     "primary_contact_name": "Nome do contato principal",
     "contact_name": "Nome de Contato",
     "amount_due": "Valor Devido",
-    "email": "Email",
+    "email": "Clientes → E-mail",
     "address": "Endereço",
     "phone": "Telefone",
     "website": "Site",
@@ -207,8 +208,8 @@
     "new_customer": "Novo Cliente",
     "edit_customer": "Editar Cliente",
     "basic_info": "Informação Básica",
-    "portal_access": "Portal Access",
-    "portal_access_text": "Would you like to allow this customer to login to the Customer Portal?",
+    "portal_access": "Clientes → Acessar portal",
+    "portal_access_text": "Clientes→ Texto do portal de acesso?",
     "portal_access_url": "Customer Portal Login URL",
     "portal_access_url_help": "Please copy & forward the above given URL to your customer for providing access.",
     "billing_address": "Endereço de cobrança",
@@ -353,7 +354,8 @@
       "amount": "Valor",
       "select_an_item": "Escreva ou clique para selecionar um item",
       "type_item_description": "Descrição do Item (opcional)"
-    }
+    },
+    "mark_as_default_estimate_template_description": "If enabled, the selected template will be automatically selected for new estimates."
   },
   "invoices": {
     "title": "Faturas",
@@ -444,7 +446,8 @@
     "deleted_message": "Fatura excluída com sucesso | Faturas excluídas com sucesso",
     "marked_as_sent_message": "Fatura marcada como enviada com sucesso",
     "something_went_wrong": "algo deu errado",
-    "invalid_due_amount_message": "O valor total da fatura não pode ser menor que o valor total pago para esta fatura. Atualize a fatura ou exclua os pagamentos associados para continuar."
+    "invalid_due_amount_message": "O valor total da fatura não pode ser menor que o valor total pago para esta fatura. Atualize a fatura ou exclua os pagamentos associados para continuar.",
+    "mark_as_default_invoice_template_description": "If enabled, the selected template will be automatically selected for new invoices."
   },
   "recurring_invoices": {
     "title": "Faturas Recorrentes",
@@ -523,6 +526,7 @@
     "cloned_successfully": "Recurring Invoice cloned successfully",
     "clone_invoice": "Clone Recurring Invoice",
     "confirm_clone": "This recurring invoice will be cloned into a new Recurring Invoice",
+    "add_customer_email": "Please add an email address for this customer to send invoices automatically.",
     "item": {
       "title": "Item Title",
       "description": "Description",
@@ -1146,7 +1150,8 @@
       "payment_mode_added": "Payment Mode Added",
       "payment_mode_updated": "Payment Mode Updated",
       "payment_mode_confirm_delete": "You will not be able to recover this Payment Mode",
-      "already_in_use": "Payment Mode is already in use",
+      "payments_attached": "This payment method is already attached to payments. Please delete the attached payments to proceed with deletion.",
+      "expenses_attached": "This payment method is already attached to expenses. Please delete the attached expenses to proceed with deletion.",
       "deleted_message": "Payment Mode deleted successfully"
     },
     "expense_category": {
