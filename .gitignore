@@ -22,3 +22,4 @@ phpdocker
 /public/docs
 /.scribe
 !storage/fonts/.gitkeep
+.php-cs-fixer.cache
