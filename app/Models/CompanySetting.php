@@ -2,8 +2,11 @@
 
 namespace Crater\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 
 class CompanySetting extends Model
 {
@@ -11,19 +14,20 @@ class CompanySetting extends Model
 
     protected $fillable = ['company_id', 'option', 'value'];
 
-    public function company()
+    public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    public function scopeWhereCompany($query, $company_id)
+    public function scopeWhereCompany(Builder $query, $company_id): Builder
     {
-        $query->where('company_id', $company_id);
+        return $query->where('company_id', '=', $company_id);
     }
 
-    public static function setSettings($settings, $company_id)
+    public static function setSettings($settings, $company_id): void
     {
         foreach ($settings as $key => $value) {
+            Cache::forget('company_setting:'.$company_id.':'.$key);
             self::updateOrCreate(
                 [
                     'option' => $key,
@@ -55,12 +59,12 @@ class CompanySetting extends Model
 
     public static function getSetting($key, $company_id)
     {
-        $setting = static::whereOption($key)->whereCompany($company_id)->first();
+        $setting = Cache::remember('company_setting:'.$company_id.':'.$key, now()->addMinutes(15), static fn () => static::whereOption($key)->whereCompany($company_id)->first());
 
         if ($setting) {
             return $setting->value;
-        } else {
-            return null;
         }
+
+        return null;
     }
 }

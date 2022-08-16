@@ -1,8 +1,8 @@
 <?php
 
 use Crater\Models\Setting;
-use Crater\Models\User;
 use Illuminate\Support\Facades\Artisan;
+
 use function Pest\Faker\faker;
 
 beforeEach(function () {

@@ -2,8 +2,12 @@
 
 namespace Crater\Http\Resources;
 
+use Crater\Models\Customer;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Customer
+ */
 class CustomerResource extends JsonResource
 {
     /**
@@ -36,19 +40,19 @@ class CustomerResource extends JsonResource
             'due_amount' => $this->due_amount,
             'base_due_amount' => $this->base_due_amount,
             'prefix' => $this->prefix,
-            'billing' => $this->when($this->billingAddress()->exists(), function () {
+            'billing' => $this->when(! is_null($this->billingAddress), function () {
                 return new AddressResource($this->billingAddress);
             }),
-            'shipping' => $this->when($this->shippingAddress()->exists(), function () {
+            'shipping' => $this->when(! is_null($this->shippingAddress), function () {
                 return new AddressResource($this->shippingAddress);
             }),
-            'fields' => $this->when($this->fields()->exists(), function () {
+            'fields' => $this->when($this->fields->count(), function () {
                 return CustomFieldValueResource::collection($this->fields);
             }),
-            'company' => $this->when($this->company()->exists(), function () {
+            'company' => $this->when(! is_null($this->company), function () {
                 return new CompanyResource($this->company);
             }),
-            'currency' => $this->when($this->currency()->exists(), function () {
+            'currency' => $this->when(! is_null($this->currency), function () {
                 return new CurrencyResource($this->currency);
             }),
         ];

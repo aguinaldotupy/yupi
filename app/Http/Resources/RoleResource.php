@@ -5,7 +5,12 @@ namespace Crater\Http\Resources;
 use Carbon\Carbon;
 use Crater\Models\CompanySetting;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Cache;
+use Silber\Bouncer\Database\Role;
 
+/**
+ * @mixin Role
+ */
 class RoleResource extends JsonResource
 {
     /**

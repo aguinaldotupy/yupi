@@ -6,6 +6,9 @@ use Crater\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin IdeHelperFileDisk
+ */
 class FileDisk extends Model
 {
     use HasFactory;

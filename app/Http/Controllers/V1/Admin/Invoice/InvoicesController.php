@@ -19,20 +19,46 @@ class InvoicesController extends Controller
      */
     public function index(Request $request)
     {
+        \DB::enableQueryLog();
+
         $this->authorize('viewAny', Invoice::class);
 
-        $limit = $request->has('limit') ? $request->limit : 10;
+        $limit = $request->input('limit', 10);
 
         $invoices = Invoice::whereCompany()
-            ->join('customers', 'customers.id', '=', 'invoices.customer_id')
             ->applyFilters($request->all())
-            ->select('invoices.*', 'customers.name')
-            ->latest()
+            ->select([
+                'invoices.id',
+                'invoices.invoice_date',
+                'invoices.invoice_number',
+                'invoices.status',
+                'invoices.due_amount',
+                'invoices.total',
+                'invoices.created_at',
+                'invoices.paid_status',
+                'invoices.overdue',
+                'invoices.unique_hash',
+                'invoices.customer_id',
+                'invoices.viewed',
+                'invoices.sent',
+                'invoices.invoice_date',
+                'invoices.due_date',
+                'invoices.company_id',
+            ])->with([
+                'customer',
+                'customer.currency',
+                'company.abilities',
+            ])->latest()
             ->paginateData($limit);
 
         return (InvoiceResource::collection($invoices))
             ->additional(['meta' => [
                 'invoice_total_count' => Invoice::whereCompany()->count(),
+                'query_log' => $log = \DB::getQueryLog(),
+                'timing' => array_reduce($log, function ($carry, $item) {
+                    $carry += $item['time'];
+                    return $carry;
+                }, 0),
             ]]);
     }
 

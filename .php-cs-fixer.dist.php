@@ -2,10 +2,10 @@
 
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__)
-    ->exclude(['bootstrap', 'storage', 'vendor'])
+    ->exclude(['bootstrap', 'storage', 'vendor', 'node_modules'])
     ->name('*.php')
     ->name('_ide_helper')
-    ->notName('*.blade.php')
+    ->notName(['*.blade.php', '_ide_helper.php', '_ide_helper_models.php'])
     ->ignoreDotFiles(true)
     ->ignoreVCS(true);
 

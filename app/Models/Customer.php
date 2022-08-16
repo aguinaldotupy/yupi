@@ -13,6 +13,9 @@ use Silber\Bouncer\Database\HasRolesAndAbilities;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
+/**
+ * @mixin IdeHelperCustomer
+ */
 class Customer extends Authenticatable implements HasMedia
 {
     use HasApiTokens;

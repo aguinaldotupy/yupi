@@ -6,6 +6,9 @@ use Crater\Traits\HasCustomFieldsTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin IdeHelperEstimateItem
+ */
 class EstimateItem extends Model
 {
     use HasFactory;

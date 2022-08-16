@@ -15,6 +15,9 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Vinkla\Hashids\Facades\Hashids;
 
+/**
+ * @mixin IdeHelperPayment
+ */
 class Payment extends Model implements HasMedia
 {
     use HasFactory;

@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
+/**
+ * @mixin IdeHelperExpense
+ */
 class Expense extends Model implements HasMedia
 {
     use HasFactory;

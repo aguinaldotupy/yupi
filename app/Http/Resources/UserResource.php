@@ -2,8 +2,12 @@
 
 namespace Crater\Http\Resources;
 
+use Crater\Models\User;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin User
+ */
 class UserResource extends JsonResource
 {
     /**
@@ -34,10 +38,10 @@ class UserResource extends JsonResource
             'is_owner' => $this->isOwner(),
             'roles' => $this->roles,
             'formatted_created_at' => $this->formattedCreatedAt,
-            'currency' => $this->when($this->currency()->exists(), function () {
+            'currency' => $this->when(! is_null($this->currency), function () {
                 return new CurrencyResource($this->currency);
             }),
-            'companies' => $this->when($this->companies()->exists(), function () {
+            'companies' => $this->when($this->companies->count(), function () {
                 return CompanyResource::collection($this->companies);
             })
         ];

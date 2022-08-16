@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Vinkla\Hashids\Facades\Hashids;
 
+/**
+ * @mixin IdeHelperRecurringInvoice
+ */
 class RecurringInvoice extends Model
 {
     use HasFactory;

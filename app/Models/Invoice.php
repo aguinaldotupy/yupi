@@ -9,8 +9,10 @@ use Crater\Mail\SendInvoiceMail;
 use Crater\Services\SerialNumberFormatter;
 use Crater\Traits\GeneratesPdfTrait;
 use Crater\Traits\HasCustomFieldsTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Nwidart\Modules\Facades\Module;
@@ -18,6 +20,9 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Vinkla\Hashids\Facades\Hashids;
 
+/**
+ * @mixin IdeHelperInvoice
+ */
 class Invoice extends Model implements HasMedia
 {
     use HasFactory;
@@ -150,37 +155,39 @@ class Invoice extends Model implements HasMedia
         return $allowed;
     }
 
-    public function getPreviousStatus()
+    public function getPreviousStatus(): string
     {
         if ($this->viewed) {
             return self::STATUS_VIEWED;
-        } elseif ($this->sent) {
-            return self::STATUS_SENT;
-        } else {
-            return self::STATUS_DRAFT;
         }
+
+        if ($this->sent) {
+            return self::STATUS_SENT;
+        }
+
+        return self::STATUS_DRAFT;
     }
 
-    public function getFormattedNotesAttribute($value)
+    public function getFormattedNotesAttribute()
     {
         return $this->getNotes();
     }
 
-    public function getFormattedCreatedAtAttribute($value)
+    public function getFormattedCreatedAtAttribute(): string
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
 
         return Carbon::parse($this->created_at)->format($dateFormat);
     }
 
-    public function getFormattedDueDateAttribute($value)
+    public function getFormattedDueDateAttribute(): string
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
 
         return Carbon::parse($this->due_date)->format($dateFormat);
     }
 
-    public function getFormattedInvoiceDateAttribute($value)
+    public function getFormattedInvoiceDateAttribute($value): string
     {
         $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
 
@@ -300,12 +307,12 @@ class Invoice extends Model implements HasMedia
         $query->where('invoices.company_id', $company);
     }
 
-    public function scopeWhereCustomer($query, $customer_id)
+    public function scopeWhereCustomer(Builder $query, $customer_id): Builder
     {
-        $query->where('invoices.customer_id', $customer_id);
+        return $query->where('invoices.customer_id', '=', $customer_id);
     }
 
-    public function scopePaginateData($query, $limit)
+    public function scopePaginateData(Builder $query, $limit)
     {
         if ($limit == 'all') {
             return $query->get();

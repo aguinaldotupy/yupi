@@ -3,8 +3,12 @@
 namespace Crater\Http\Resources;
 
 use Crater\Models\CompanySetting;
+use Crater\Models\CustomFieldValue;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin CustomFieldValue
+ */
 class CustomFieldValueResource extends JsonResource
 {
     /**
@@ -30,10 +34,10 @@ class CustomFieldValueResource extends JsonResource
             'company_id' => $this->company_id,
             'default_answer' => $this->defaultAnswer,
             'default_formatted_answer' => $this->dateTimeFormat(),
-            'custom_field' => $this->when($this->customField()->exists(), function () {
+            'custom_field' => $this->when(! is_null($this->customField), function () {
                 return new CustomFieldResource($this->customField);
             }),
-            'company' => $this->when($this->company()->exists(), function () {
+            'company' => $this->when(! is_null($this->company), function () {
                 return new CompanyResource($this->company);
             }),
         ];

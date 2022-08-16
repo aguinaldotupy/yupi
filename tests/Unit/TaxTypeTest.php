@@ -1,7 +1,6 @@
 <?php
 
 use Crater\Models\TaxType;
-use Crater\Models\User;
 use Illuminate\Support\Facades\Artisan;
 
 beforeEach(function () {

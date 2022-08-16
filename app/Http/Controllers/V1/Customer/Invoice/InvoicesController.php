@@ -8,19 +8,20 @@ use Crater\Models\Company;
 use Crater\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class InvoicesController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection|\Illuminate\Http\Response
      */
     public function index(Request $request)
     {
         $limit = $request->has('limit') ? $request->limit : 10;
 
-        $invoices = Invoice::with(['items', 'customer', 'creator', 'taxes'])
+        $invoices = Invoice::with(['items', 'customer', 'creator', 'taxes', 'fields', 'company', 'currency'])
             ->where('status', '<>', 'DRAFT')
             ->applyFilters($request->all())
             ->whereCustomer(Auth::guard('customer')->id())

@@ -2,8 +2,12 @@
 
 namespace Crater\Http\Resources\Customer;
 
+use Crater\Models\Invoice;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Invoice
+ */
 class InvoiceResource extends JsonResource
 {
     /**
@@ -45,29 +49,29 @@ class InvoiceResource extends JsonResource
             'base_tax' => $this->base_tax,
             'base_due_amount' => $this->base_due_amount,
             'currency_id' => $this->currency_id,
-            'formatted_created_at' => $this->formattedCreatedAt,
-            'formatted_notes' => $this->formattedNotes,
-            'invoice_pdf_url' => $this->invoicePdfUrl,
-            'formatted_invoice_date' => $this->formattedInvoiceDate,
-            'formatted_due_date' => $this->formattedDueDate,
+            'formatted_created_at' => $this->formatted_created_at,
+            'formatted_notes' => $this->formatted_notes,
+            'invoice_pdf_url' => $this->invoice_pdf_url,
+            'formatted_invoice_date' => $this->formatted_invoice_date,
+            'formatted_due_date' => $this->formatted_due_date,
             'payment_module_enabled' => $this->payment_module_enabled,
             'overdue' => $this->overdue,
-            'items' => $this->when($this->items()->exists(), function () {
+            'items' => $this->when($this->items->count(), function () {
                 return InvoiceItemResource::collection($this->items);
             }),
-            'customer' => $this->when($this->customer()->exists(), function () {
+            'customer' => $this->when($this->customer->count(), function () {
                 return new CustomerResource($this->customer);
             }),
-            'taxes' => $this->when($this->taxes()->exists(), function () {
+            'taxes' => $this->when($this->taxes->count(), function () {
                 return TaxResource::collection($this->taxes);
             }),
-            'fields' => $this->when($this->fields()->exists(), function () {
+            'fields' => $this->when($this->fields->count(), function () {
                 return CustomFieldValueResource::collection($this->fields);
             }),
-            'company' => $this->when($this->company()->exists(), function () {
+            'company' => $this->when($this->company_id, function () {
                 return new CompanyResource($this->company);
             }),
-            'currency' => $this->when($this->currency()->exists(), function () {
+            'currency' => $this->when($this->currency_id, function () {
                 return new CurrencyResource($this->currency);
             }),
         ];

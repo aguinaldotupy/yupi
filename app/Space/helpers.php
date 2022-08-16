@@ -9,27 +9,32 @@ use Illuminate\Support\Str;
 /**
  * Get company setting
  *
+ * @param $key
  * @param $company_id
  * @return string
  */
-function get_company_setting($key, $company_id)
+function get_company_setting($key, $company_id): ?string
 {
     if (\Storage::disk('local')->has('database_created')) {
         return CompanySetting::getSetting($key, $company_id);
     }
+
+    return null;
 }
 
 /**
  * Get app setting
  *
- * @param $company_id
+ * @param $key
  * @return string
  */
-function get_app_setting($key)
+function get_app_setting($key): ?string
 {
     if (\Storage::disk('local')->has('database_created')) {
         return Setting::getSetting($key);
     }
+
+    return null;
 }
 
 /**
@@ -38,24 +43,25 @@ function get_app_setting($key)
  * @param $company_id
  * @return string
  */
-function get_page_title($company_id)
+function get_page_title($company_id): string
 {
     $routeName = Route::currentRouteName();
 
-    $pageTitle = null;
     $defaultPageTitle = 'Crater - Self Hosted Invoicing Platform';
 
     if (\Storage::disk('local')->has('database_created')) {
         if ($routeName === 'customer.dashboard') {
             $pageTitle = CompanySetting::getSetting('customer_portal_page_title', $company_id);
 
-            return $pageTitle ? $pageTitle : $defaultPageTitle;
+            return $pageTitle ?: $defaultPageTitle;
         }
 
         $pageTitle = Setting::getSetting('admin_page_title');
 
-        return $pageTitle ? $pageTitle : $defaultPageTitle;
+        return $pageTitle ?: $defaultPageTitle;
     }
+
+    return $defaultPageTitle;
 }
 
 /**
@@ -65,7 +71,7 @@ function get_page_title($company_id)
  * @param string $active
  * @return string
  */
-function set_active($path, $active = 'active')
+function set_active($path, string $active = 'active'): string
 {
     return call_user_func_array('Request::is', (array)$path) ? $active : '';
 }
@@ -83,26 +89,13 @@ function is_url($path)
  * @param string $type
  * @return string
  */
-function getCustomFieldValueKey(string $type)
+function getCustomFieldValueKey(string $type): string
 {
     switch ($type) {
-        case 'Input':
-            return 'string_answer';
-
-        case 'TextArea':
-            return 'string_answer';
-
-        case 'Phone':
-            return 'number_answer';
-
-        case 'Url':
-            return 'string_answer';
 
         case 'Number':
+        case 'Phone':
             return 'number_answer';
-
-        case 'Dropdown':
-            return 'string_answer';
 
         case 'Switch':
             return 'boolean_answer';
@@ -116,6 +109,10 @@ function getCustomFieldValueKey(string $type)
         case 'DateTime':
             return 'date_time_answer';
 
+        case 'Dropdown':
+        case 'Url':
+        case 'TextArea':
+        case 'Input':
         default:
             return 'string_answer';
     }
@@ -123,11 +120,12 @@ function getCustomFieldValueKey(string $type)
 
 /**
  * @param $money
- * @return formated_money
+ * @param null $currency
+ * @return string formated_money
  */
-function format_money_pdf($money, $currency = null)
+function format_money_pdf($money, $currency = null): string
 {
-    $money = $money / 100;
+    $money /= 100;
 
     if (! $currency) {
         $currency = Currency::findOrFail(CompanySetting::getSetting('currency', 1));
@@ -151,10 +149,13 @@ function format_money_pdf($money, $currency = null)
 }
 
 /**
- * @param $string
+ * @param $model
+ * @param $title
+ * @param int|string $id
  * @return string
+ * @throws Exception
  */
-function clean_slug($model, $title, $id = 0)
+function clean_slug($model, $title, $id = 0): string
 {
     // Normalize the title
     $slug = Str::upper('CUSTOM_'.$model.'_'.Str::slug($title, '_'));
@@ -176,7 +177,7 @@ function clean_slug($model, $title, $id = 0)
         }
     }
 
-    throw new \Exception('Can not create a unique slug');
+    throw new \RuntimeException('Can not create a unique slug');
 }
 
 function getRelatedSlugs($type, $slug, $id = 0)
@@ -187,10 +188,24 @@ function getRelatedSlugs($type, $slug, $id = 0)
         ->get();
 }
 
-function respondJson($error, $message)
+function respondJson($error, $message): \Illuminate\Http\JsonResponse
 {
     return response()->json([
         'error' => $error,
         'message' => $message
     ], 422);
+}
+
+function getSqlWithBindings(string $sql, array $bindings): string
+{
+    return vsprintf(str_replace('?', '%s', $sql), array_map(static fn ($binding) => is_numeric($binding) ? $binding : "'$binding'", $bindings));
+}
+
+function getSqlWithBindingsFromQueryLog(array $queryLog = []): array
+{
+    if (count($queryLog) === 0) {
+        $queryLog = DB::getQueryLog();
+    }
+
+    return array_map(static fn ($log) => getSqlWithBindings($log['query'] ?? '', $log['bindings'] ?? []), $queryLog);
 }

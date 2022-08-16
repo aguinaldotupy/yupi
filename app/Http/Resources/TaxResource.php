@@ -2,8 +2,12 @@
 
 namespace Crater\Http\Resources;
 
+use Crater\Models\Tax;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @mixin Tax
+ */
 class TaxResource extends JsonResource
 {
     /**
@@ -31,10 +35,10 @@ class TaxResource extends JsonResource
             'currency_id' => $this->currency_id,
             'type' => $this->taxType->type,
             'recurring_invoice_id' => $this->recurring_invoice_id,
-            'tax_type' => $this->when($this->taxType()->exists(), function () {
+            'tax_type' => $this->when(! is_null($this->taxType), function () {
                 return new TaxTypeResource($this->taxType);
             }),
-            'currency' => $this->when($this->currency()->exists(), function () {
+            'currency' => $this->when(! is_null($this->currency), function () {
                 return new CurrencyResource($this->currency);
             }),
         ];

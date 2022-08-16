@@ -4,6 +4,8 @@ namespace Crater\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 use Silber\Bouncer\BouncerFacade;
 use Silber\Bouncer\Database\Role;
 use Spatie\MediaLibrary\HasMedia;
@@ -26,8 +28,12 @@ class Company extends Model implements HasMedia
 
     public function getRolesAttribute()
     {
-        return Role::where('scope', $this->id)
-            ->get();
+        return Cache::remember('company_setting:'.$this->id.':roles', now()->addMinutes(15), fn () => Role::where('scope', $this->id)->get());
+    }
+
+    public function abilities(): HasMany
+    {
+        return $this->hasMany(Role::class, 'scope', 'id');
     }
 
     public function getLogoPathAttribute()

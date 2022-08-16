@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Vinkla\Hashids\Facades\Hashids;
 
+/**
+ * @mixin IdeHelperTransaction
+ */
 class Transaction extends Model
 {
     use HasFactory;
