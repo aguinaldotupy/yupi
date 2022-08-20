@@ -21,10 +21,7 @@ services:
     image: mariadb
     restart: always
     volumes:
-      - db:/var/lib/mysql
-      # If you want to persist data on the host, comment the line above this one...
-      # and uncomment the line under this one.
-      #- ./docker-compose/db/data:/var/lib/mysql:rw,delegated
+      - ./docker-compose/db/data:/var/lib/mysql:rw,delegated
     environment:
       MYSQL_USER: crater
       MYSQL_PASSWORD: crater
@@ -55,8 +52,27 @@ services:
     networks:
       - crater
 
-volumes:
-  db:
+  cache:
+    restart: always
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./docker-compose/cache/data:/data
+      - ./docker/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    env_file:
+      - .env
+    command:
+      - redis-server
+      - /usr/local/etc/redis/redis.conf
+      - --requirepass ${REDIS_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: '512M'
+    networks:
+      - crater
 
 networks:
   crater:
