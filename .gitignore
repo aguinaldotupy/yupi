@@ -26,3 +26,4 @@ phpdocker
 _ide_helper_models.php
 _ide_helper.php
 .env.production
+database/backup
