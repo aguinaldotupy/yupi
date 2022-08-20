@@ -97,8 +97,10 @@ class ExchangeRateProvider extends Model
                 break;
 
             case 'currency_layer':
-                $url = "http://api.currencylayer.com/live?access_key=".$request['key']."&source=INR&currencies=USD";
-                $response = Http::get($url)->json();
+                $url = "https://api.apilayer.com/currency_data/live?access_key=".$request['key']."&source=INR&currencies=USD";
+                $response = Http::withHeaders([
+                    'apiKey' => $request['key'],
+                ])->get($url)->json();
 
                 if (array_key_exists('success', $response)) {
                     if ($response["success"] == false) {
