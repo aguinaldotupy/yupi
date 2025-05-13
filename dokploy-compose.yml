@@ -74,4 +74,4 @@ services:
 
 networks:
   crater:
-    drive: bridge
+    driver: bridge
